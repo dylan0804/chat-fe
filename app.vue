@@ -1,10 +1,13 @@
 <template>
-  <div>
-    <Chat />
+  <div class="flex flex-col h-screen">
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+
+    <UNotifications />
   </div>
 </template>
 
 <script setup lang="ts">
-import Chat from './components/Chat.client.vue';
-
 </script>
+
