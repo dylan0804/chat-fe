@@ -16,7 +16,6 @@
           <p class="text-sm text-gray-500 dark:text-gray-400">
             {{ room?.description }}
           </p>
-          <p>{{ ws.status }}</p>
         </div>
       </div>
 
@@ -52,23 +51,23 @@
           v-for="(message, i) in messages"
           :key="i"
           class="flex gap-4 mx-auto"
-          :class="i % 2 === 0 ? 'flex-row-reverse' : ''"
+          :class="message.clientId === clientId ? 'justify-end' : 'justify-start'"
         >
           <!-- Message Bubble -->
           <div 
-            class="flex flex-col gap-1"
-            :class="i % 2 === 0 ? 'items-end' : ''"
+            class="flex flex-col max-w-[80%]"
+            :class="message.clientId === clientId ? 'items-end' : 'items-start'"
           >
             <div 
-              class="px-4 py-2 rounded-2xl text-sm"
-              :class="i % 2 === 0 ? 
-                'bg-primary-500 text-white rounded-tr-sm' : 
-                'bg-white dark:bg-gray-800 rounded-tl-sm'"
+              class="px-4 py-2 rounded-2xl text-sm break-words"
+              :class="message.clientId === clientId ? 
+                'bg-primary-500 text-white rounded-br-sm' : 
+                'bg-white dark:bg-gray-800 rounded-bl-sm'"
             >
-              <p>{{ message}}</p>
+              <p>{{ message.content }}</p>
             </div>
-            <span class="text-xs text-gray-500 dark:text-gray-400 px-2">
-              {{ i % 2 === 0 ? 'You' : 'John Doe' }} • 2 min ago
+            <span class="text-xs text-gray-500 dark:text-gray-400 px-2 mt-1">
+              {{ message.clientId === clientId ? 'You' : 'Other' }} • {{ message.timestamp }}
             </span>
           </div>
         </div>
@@ -78,7 +77,7 @@
     <!-- Chat Input Area -->
     <div class="p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800">
       <div class="mx-auto">
-        <form @submit.prevent="sendMessage" class="flex gap-2">
+        <form @submit.prevent="sendMessage" class="flex gap-2 items-center">
           <UTextarea
             v-model="messageText"
             :rows="1"
@@ -88,14 +87,15 @@
               base: 'relative block w-full transition-all duration-200 focus:ring-2 focus:ring-primary-500/20',
             }"
             class="resize-none"
+            autofocus
             @keydown.enter.prevent="sendMessage"
           />
           <UButton
             type="submit"
             color="primary"
+            class="h-[32px]"
             :loading="sending"
             :disabled="!messageText.trim()"
-            class="self-end"
           >
             <UIcon name="i-heroicons-paper-airplane" />
           </UButton>
@@ -114,6 +114,12 @@ interface Room {
   is_private: boolean
 }
 
+interface Message {
+  content: string
+  clientId: string
+  timestamp?: string
+}
+
 definePageMeta({
   layout: 'sidebar'
 })
@@ -122,7 +128,8 @@ const route = useRoute()
 const loading = ref(false)
 const sending = ref(false)
 const messageText = ref('')
-const messages = ref<string[]>([])
+const messages = ref<Message[]>([])
+const { user } = useUserSession()
 
 // Menu items for room options
 const menuItems = [
@@ -152,8 +159,10 @@ async function sendMessage() {
   try {
     ws.send(JSON.stringify({
       type: 'message',
-      content: messageText.value
+      content: messageText.value,
+      client_id: user.value.user_id
     }))
+    console.log('message sent')
     messageText.value = ''
   } finally {
     sending.value = false
@@ -182,8 +191,13 @@ const ws =
     onMessage: (ws, event) => {
       try {
         const data = JSON.parse(event.data)
+        console.log('data', data)
         if (data.type !== 'pong') {
-          messages.value.push(data)
+          messages.value.push({
+            content: data.content,
+            clientId: data.client_id,
+            timestamp: new Date().toLocaleTimeString()
+          })
         }
       } catch (error) {
         console.error('Error parsing message:', error)

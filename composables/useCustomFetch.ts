@@ -1,11 +1,22 @@
 import type { UseFetchOptions } from 'nuxt/app';
 
+export interface BaseResponse<T> {
+    success: string,
+    message: string,
+    data: T
+}
+
 export function useCustomFetch<T>(
     url: string | (() => string),
-    options: UseFetchOptions<T> = {}
+    options: UseFetchOptions<BaseResponse<T>> = {}
 ) {
-    const { method = 'GET', server = true } = options
+    const { user } = useUserSession()
 
+    const { method = 'GET', server = true } = options    
+    options.headers = user.value ? {
+        'Authorization': `Bearer ${user.value.token}`
+    } : {}
+    
     return useFetch(url, {
         method,
         server,

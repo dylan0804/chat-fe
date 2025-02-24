@@ -99,6 +99,8 @@ interface FormState {
 
 const toast = useToast()
 
+const { session } = useUserSession()
+
 // Form state
 const formState = ref<FormState>({
   roomName: '',
