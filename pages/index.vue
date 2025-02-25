@@ -89,7 +89,6 @@
 </template>
 
 <script setup lang="ts">
-import { useCustomFetch } from '~/composables/useCustomFetch'
 
 interface FormState {
   roomName: string
@@ -97,9 +96,9 @@ interface FormState {
   maxParticipants: number
 }
 
-const toast = useToast()
+const { $api } = useNuxtApp()
 
-const { session } = useUserSession()
+const toast = useToast()
 
 // Form state
 const formState = ref<FormState>({
@@ -110,12 +109,6 @@ const formState = ref<FormState>({
 
 // UI state
 const isLoading = ref(false)
-const notification = reactive({
-  show: false,
-  title: '',
-  description: '',
-  color: 'green'
-})
 
 const participantOptions = [
   { label: '5 participants', value: 5 },
@@ -127,16 +120,12 @@ const participantOptions = [
 // Form submission
 async function createRoom() {
   if (!formState.value.roomName.trim()) {
-    showNotification('Error', 'Room name is required', 'red')
     return
   }
 
   isLoading.value = true
 
   const payload = {
-    params: {
-      room: formState.value.maxParticipants
-    },
     body: {
       name: formState.value.roomName.trim(),
       description: formState.value.description.trim(),
@@ -146,17 +135,12 @@ async function createRoom() {
   }
 
   try {
-    await useCustomFetch<string>('rooms', {
+    await $api('/rooms', {
       method: 'POST',
-      ...payload,
+      ...payload
     })
     
-    toast.add({
-      title: 'Success',
-      description: 'Your chat room has been created!',
-      color: 'green'
-    })
-    resetForm()
+    navigateTo(`/rooms`)
   } catch (error) {
     toast.add({
       title: 'Error',
@@ -167,20 +151,6 @@ async function createRoom() {
   } finally {
     isLoading.value = false
   }
-}
-
-// Helper functions
-function resetForm() {
-  formState.value.roomName = ''
-  formState.value.description = ''
-  formState.value.maxParticipants = 10
-}
-
-function showNotification(title: string, description: string, color: string) {
-  notification.title = title
-  notification.description = description
-  notification.color = color
-  notification.show = true
 }
 </script>
 

@@ -51,7 +51,7 @@
                         {{ room.name }}
                       </h3>
                       <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                        {{ formatParticipants(room.max_participants) }}
+                        {{ room.max_participants }} max
                       </span>
                     </div>
                     <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
@@ -71,6 +71,8 @@
 </template>
 
 <script setup lang="ts">
+import { generateGradientClass } from '~/utils'
+
 interface Room {
   id: number
   name: string
@@ -79,47 +81,28 @@ interface Room {
   is_private: boolean
 }
 
-// Search functionality
+// search func
 const searchQuery = ref('')
 const filteredRooms = computed(() => {
   if (!rooms.value) return []
   if (!searchQuery.value) return rooms.value
   
   const query = searchQuery.value.toLowerCase()
-  return rooms.value.filter(room => 
+  return rooms.value.filter((room: Room) => 
     room.name.toLowerCase().includes(query) ||
     (room.description && room.description.toLowerCase().includes(query))
   )
 })
 
-// Room selection
+// room selection
 const selectedRoom = ref<Room | null>(null)
 function selectRoom(room: Room) {
   selectedRoom.value = room
   navigateTo(`/rooms/${room.id}`)
 }
 
-// Utility functions
-function generateGradientClass(name: string) {
-  const gradients = [
-    'bg-gradient-to-br from-pink-500 to-rose-500',
-    'bg-gradient-to-br from-blue-500 to-indigo-500',
-    'bg-gradient-to-br from-green-500 to-emerald-500',
-    'bg-gradient-to-br from-purple-500 to-violet-500',
-    'bg-gradient-to-br from-orange-500 to-amber-500'
-  ]
-  
-  // Generate a consistent index based on the room name
-  const index = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-  return gradients[index % gradients.length]
-}
+// init
+const { data } = useCustomFetch<Room[]>('/rooms')
+const rooms = computed(() => data.value?.data)
 
-function formatParticipants(max: number) {
-  return `${max} max`
-}
-
-// Fetch rooms
-const { data: rooms } = useCustomFetch<Room[]>('/rooms', {
-    server: true
-})
 </script>

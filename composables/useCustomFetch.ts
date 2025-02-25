@@ -1,8 +1,9 @@
 import type { UseFetchOptions } from 'nuxt/app';
 
-export interface BaseResponse<T> {
+export interface BaseResponse<T = void> {
     success: string,
     message: string,
+    errors?: string[],
     data: T
 }
 
@@ -21,7 +22,6 @@ export function useCustomFetch<T>(
         method,
         server,
         $fetch: useNuxtApp().$api,
-        transform: (response: any) => response.data,
         ...options,
     })
 }

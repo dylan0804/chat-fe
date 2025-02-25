@@ -89,10 +89,9 @@
 import type { FormSubmitEvent } from '#ui/types'
 import { z } from 'zod'
 
-type Schema = z.output<typeof schema>
+const { error: errorToast } = useCustomToast()
 
-const router = useRouter()
-const toast = useToast()
+type Schema = z.output<typeof schema>
 
 const isLoading = ref(false)
 
@@ -133,14 +132,15 @@ async function handleRegister(event: FormSubmitEvent<Schema>) {
   }
 
   try {
-    await $fetch('/api/login', {
+    await $fetch('/api/register', {
       method: 'POST',
       ...payload
     })
+    
 
     navigateTo('/rooms')
-  } catch (error) {
-    console.error(error)
+  } catch (error: any) {
+    errorToast('Error', error.data.data.message)
   }
 }
 

@@ -5,28 +5,21 @@
       <div class="flex items-center gap-4">
         <div 
           class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-semibold text-lg"
-          :class="generateGradientClass(room?.name || '')"
+          :class="generateGradientClass(roomDetails?.name || '')"
         >
-          {{ room?.name?.charAt(0).toUpperCase() }}
+          {{ roomDetails?.name?.charAt(0).toUpperCase() }}
         </div>
         <div>
           <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {{ room?.name }}
+            {{ roomDetails?.name }}
           </h2>
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            {{ room?.description }}
+            {{ roomDetails?.description }}
           </p>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
-        <UButton
-          color="gray"
-          variant="ghost"
-          icon="i-heroicons-users"
-        >
-          {{ room?.max_participants }} max
-        </UButton>
         <UDropdown
           :items="menuItems"
           :popper="{ placement: 'bottom-end' }"
@@ -51,28 +44,30 @@
           v-for="(message, i) in messages"
           :key="i"
           class="flex gap-4 mx-auto"
-          :class="message.clientId === clientId ? 'justify-end' : 'justify-start'"
+          :class="message.userId === user.user_id ? 'justify-end' : 'justify-start'"
         >
           <!-- Message Bubble -->
           <div 
             class="flex flex-col max-w-[80%]"
-            :class="message.clientId === clientId ? 'items-end' : 'items-start'"
+            :class="message.userId === user.user_id ? 'items-end' : 'items-start'"
           >
             <div 
               class="px-4 py-2 rounded-2xl text-sm break-words"
-              :class="message.clientId === clientId ? 
+              :class="message.userId === user.user_id ? 
                 'bg-primary-500 text-white rounded-br-sm' : 
                 'bg-white dark:bg-gray-800 rounded-bl-sm'"
             >
               <p>{{ message.content }}</p>
             </div>
             <span class="text-xs text-gray-500 dark:text-gray-400 px-2 mt-1">
-              {{ message.clientId === clientId ? 'You' : 'Other' }} • {{ message.timestamp }}
+              {{ message.userId === user.user_id ? 'You' : 'Other' }} • {{ message.createdAt }}
             </span>
           </div>
         </div>
       </template>
     </div>
+
+    <p>{{ roomData }}</p>
 
     <!-- Chat Input Area -->
     <div class="p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800">
@@ -106,20 +101,6 @@
 </template>
 
 <script setup lang="ts">
-interface Room {
-  id: number
-  name: string
-  description: string
-  max_participants: number
-  is_private: boolean
-}
-
-interface Message {
-  content: string
-  clientId: string
-  timestamp?: string
-}
-
 definePageMeta({
   layout: 'sidebar'
 })
@@ -128,8 +109,21 @@ const route = useRoute()
 const loading = ref(false)
 const sending = ref(false)
 const messageText = ref('')
-const messages = ref<Message[]>([])
 const { user } = useUserSession()
+
+const websocketStore = useWebsocketStore()
+const roomStore = useRoomStore()
+
+const { connect, send } = websocketStore
+
+// init
+const { data: roomData } = useAsyncData(() => roomStore.getRoom(route.params.id as string), {
+  pick: ['data']
+})
+websocketStore.connect(route.params.id as string, user.value.token)
+
+const roomDetails = computed(() => roomData.value?.data.roomDetails)
+const messages = computed(() => roomData.value?.data.messages || [])
 
 // Menu items for room options
 const menuItems = [
@@ -157,62 +151,19 @@ async function sendMessage() {
   
   sending.value = true
   try {
-    ws.send(JSON.stringify({
+    send({
       type: 'message',
       content: messageText.value,
-      client_id: user.value.user_id
-    }))
-    console.log('message sent')
+    })
+    
+    roomData.value?.data.messages.push({
+      content: messageText.value,
+      userId: user.value.user_id,
+    })
+
     messageText.value = ''
   } finally {
     sending.value = false
   }
 }
-
-// Utility function for consistent gradient colors
-function generateGradientClass(name: string) {
-  const gradients = [
-    'bg-gradient-to-br from-pink-500 to-rose-500',
-    'bg-gradient-to-br from-blue-500 to-indigo-500',
-    'bg-gradient-to-br from-green-500 to-emerald-500',
-    'bg-gradient-to-br from-purple-500 to-violet-500',
-    'bg-gradient-to-br from-orange-500 to-amber-500'
-  ]
-  
-  const index = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-  return gradients[index % gradients.length]
-}
-
-const { data: room } = useCustomFetch<Room>(`/rooms/${route.params.id}`, {
-    server: true
-})
-const ws = 
-  useWebSocket(`ws://localhost:8080/ws/rooms/${route.params.id}`, {
-    onMessage: (ws, event) => {
-      try {
-        const data = JSON.parse(event.data)
-        console.log('data', data)
-        if (data.type !== 'pong') {
-          messages.value.push({
-            content: data.content,
-            clientId: data.client_id,
-            timestamp: new Date().toLocaleTimeString()
-          })
-        }
-      } catch (error) {
-        console.error('Error parsing message:', error)
-      }
-    },
-    heartbeat: {
-      message: JSON.stringify({
-        type: 'ping'
-      }),
-      interval: 60000
-    }
-  })
-
-function init() {
-}
-
-init()
 </script>
