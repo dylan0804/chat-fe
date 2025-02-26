@@ -1,13 +1,13 @@
-interface RegisterResponse {
-    token: string,
-    user_id: string
+interface LoginResponse {
+  token: string,
+  user_id: string
 }
 
 export default defineEventHandler(async (event) => {
   const { email, password } = await readBody(event)
 
   try {
-    const { data } = await $fetch<BaseResponse<RegisterResponse>>('http://localhost:8080/api/v1/auth/register', {
+    const { data } = await $fetch<BaseResponse<LoginResponse>>('http://localhost:8080/api/v1/auth/login', {
         method: 'POST',
         body: {
             email,
@@ -23,7 +23,9 @@ export default defineEventHandler(async (event) => {
         },
     })
     
-  } catch (error) {
-    console.error(error)
+  } catch (error: any) {
+    throw createError({
+      statusMessage: error.data.message
+    })
   }
 })

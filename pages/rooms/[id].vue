@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col bg-gray-50 dark:bg-gray-900/50 w-full">
+  <div class="flex flex-col h-full bg-gray-50 dark:bg-gray-900/50 w-full">
     <!-- Chat Header -->
     <div class="flex justify-between p-4 border-b border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
       <div class="flex items-center gap-4">
@@ -54,7 +54,7 @@
             <div 
               class="px-4 py-2 rounded-2xl text-sm break-words"
               :class="message.userId === user.user_id ? 
-                'bg-primary-500 text-white rounded-br-sm' : 
+                'bg-primary-500 text-black rounded-br-sm' : 
                 'bg-white dark:bg-gray-800 rounded-bl-sm'"
             >
               <p>{{ message.content }}</p>
@@ -66,8 +66,6 @@
         </div>
       </template>
     </div>
-
-    <p>{{ roomData }}</p>
 
     <!-- Chat Input Area -->
     <div class="p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800">

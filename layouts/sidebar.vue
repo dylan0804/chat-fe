@@ -1,9 +1,9 @@
 <template>
-    <div class="flex bg-gray-50 dark:bg-gray-900">
-        <div class="w-96 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 backdrop-blur-sm">
+    <div class="flex h-full bg-gray-50 dark:bg-gray-900">
+        <div class="flex flex-col h-full w-96 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 backdrop-blur-sm">
           <!-- Search and Create Section -->
-          <div class="p-4 border-b border-gray-200 dark:border-gray-800">
-            <div class="flex items-center gap-2 mb-4">
+          <div class="p-6 border-b border-gray-200 dark:border-gray-800">
+            <div class="flex items-center gap-2">
               <UInput
                 v-model="searchQuery"
                 placeholder="Search rooms..."
@@ -22,7 +22,7 @@
             </div>
           </div>
           <!-- Rooms List -->
-          <div class="overflow-y-auto h-[calc(100vh-5rem)]">
+          <div class="flex-1 overflow-y-auto">
             <div class="p-2 space-y-2">
               <UCard
                 v-for="room in filteredRooms"
@@ -64,6 +64,16 @@
               </UCard>
             </div>
           </div>
+
+          <div class="p-4 mt-auto">
+            <UDropdown class="w-full" :items="items" :popper="{ placement: 'bottom-start' }">
+              <UButton :label="user.email" color="gray" block>
+                <template #trailing>
+                  <UIcon name="i-heroicons-chevron-up-20-solid" class="w-5 h-5" />
+                </template>
+              </UButton>
+            </UDropdown>
+          </div>
         </div>
 
         <slot />
@@ -80,6 +90,26 @@ interface Room {
   max_participants: number
   is_private: boolean
 }
+
+const { $api } = useNuxtApp()
+const { user, clear } = useUserSession()
+
+// init
+const { data } = useCustomFetch<Room[]>('/rooms')
+const rooms = computed(() => data.value?.data)
+
+const items = [
+  [{
+    label: 'Profile',
+    avatar: {
+      src: 'https://avatars.githubusercontent.com/u/739984?v=4'
+    }
+  }], [{
+    label: 'Logout',
+    class: 'text-red-500',
+    click: () => logout()
+  }]
+]
 
 // search func
 const searchQuery = ref('')
@@ -101,8 +131,17 @@ function selectRoom(room: Room) {
   navigateTo(`/rooms/${room.id}`)
 }
 
-// init
-const { data } = useCustomFetch<Room[]>('/rooms')
-const rooms = computed(() => data.value?.data)
+async function logout() {
+  try {
+    await $api('/auth/logout', {
+      method: 'POST'
+    })
+
+    await clear()
+    navigateTo('/auth')
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 </script>

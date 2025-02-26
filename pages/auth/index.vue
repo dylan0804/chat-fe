@@ -89,7 +89,8 @@
 import type { FormSubmitEvent } from '#ui/types'
 import { z } from 'zod'
 
-const { error: errorToast } = useCustomToast()
+const { $api } = useNuxtApp()
+const { errorToast } = useCustomToast()
 
 type Schema = z.output<typeof schema>
 
@@ -123,6 +124,8 @@ const registerForm = ref({
   password: '',
 })
 
+const { fetch: refreshSession } = useUserSession()
+
 async function handleRegister(event: FormSubmitEvent<Schema>) {
   const payload = {
     body: {
@@ -137,6 +140,7 @@ async function handleRegister(event: FormSubmitEvent<Schema>) {
       ...payload
     })
     
+    await refreshSession()
 
     navigateTo('/rooms')
   } catch (error: any) {
@@ -144,7 +148,26 @@ async function handleRegister(event: FormSubmitEvent<Schema>) {
   }
 }
 
-function handleLogin() {
-  
+async function handleLogin() {
+  const payload = {
+    body: {
+      email: loginForm.value.email,
+      password: loginForm.value.password
+    }
+  }
+
+  try {
+    await $fetch('/api/login', {
+      method: 'POST',
+      ...payload
+    })
+
+    await refreshSession()
+
+    navigateTo('/rooms')
+  } catch (error: any) {
+    console.log(error.data.statusMessage)
+    errorToast('Error', error.data.statusMessage)
+  }
 }
 </script> 

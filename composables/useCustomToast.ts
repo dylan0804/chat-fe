@@ -1,7 +1,7 @@
 export function useCustomToast() {
     const toast = useToast()
 
-    function success(title: string, description?: string) {
+    function successToast(title: string, description?: string) {
         toast.add({
             title,
             description,
@@ -11,7 +11,7 @@ export function useCustomToast() {
         })
     }
 
-    function error(title: string, description?: string) {
+    function errorToast(title: string, description?: string) {
         toast.add({
             title,
             description,
@@ -21,7 +21,7 @@ export function useCustomToast() {
         })
     }
 
-    function info(title: string, description?: string) {
+    function infoToast(title: string, description?: string) {
         toast.add({
             title,
             description,
@@ -31,7 +31,7 @@ export function useCustomToast() {
         })
     }
 
-    function warning(title: string, description?: string) {
+    function warningToast(title: string, description?: string) {
         toast.add({
             title,
             description,
@@ -43,10 +43,10 @@ export function useCustomToast() {
 
     return {
         toast,
-        
-        success,
-        error,
-        info,
-        warning
+
+        successToast,
+        errorToast,
+        infoToast,
+        warningToast
     }
 }
