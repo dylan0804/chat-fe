@@ -8,6 +8,7 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxt/ui',
     'nuxt-auth-utils',
+    'nuxt-time',
   ],
   runtimeConfig: {
     public: {

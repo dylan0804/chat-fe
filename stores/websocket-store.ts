@@ -8,6 +8,7 @@ import type { UseWebSocketReturn } from '@vueuse/core'
 interface MessagePayload {
     type: 'message',
     content: string
+    createdAt: string
 }
 
 const wsUrl = 'ws://localhost:8080/ws/rooms'
@@ -15,15 +16,14 @@ const wsUrl = 'ws://localhost:8080/ws/rooms'
 export const useWebsocketStore = defineStore('websocket-store', () => {
     const ws = ref<UseWebSocketReturn<any>>()
 
-    const { messages } = useRoomStore()
+    const { messages } = storeToRefs(useRoomStore())
 
     function connect(roomId: string, token: string) {
         ws.value = useWebSocket(`${wsUrl}/${roomId}?token=${token}`, {
             onMessage: (ws, event) => {
                 handleMessage(ws, event)
-            }
-
-            ,
+            },
+            
             heartbeat: {
                 message: JSON.stringify({
                     type: 'ping'
@@ -42,14 +42,17 @@ export const useWebsocketStore = defineStore('websocket-store', () => {
 
         if (data.type === 'pong') return
 
-        messages.push({
+        messages.value.push({
             userId: data.userId,
             content: data.content,
+            createdAt: data.createdAt,
         })
     }
     
     return {
         connect,
         send,
+        
+        ws
     }
 })

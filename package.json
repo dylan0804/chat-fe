@@ -16,6 +16,7 @@
     "@vueuse/nuxt": "^12.7.0",
     "nuxt": "^3.15.4",
     "nuxt-auth-utils": "^0.5.16",
+    "nuxt-time": "^1.0.3",
     "pinia": "^3.0.1",
     "vue": "latest",
     "vue-router": "latest",

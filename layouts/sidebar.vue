@@ -1,5 +1,5 @@
 <template>
-    <div class="flex h-full bg-gray-50 dark:bg-gray-900">
+    <div class="flex h-full bg-gray-50 dark:bg-gray-900 w-full">
         <div class="flex flex-col h-full w-96 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 backdrop-blur-sm">
           <!-- Search and Create Section -->
           <div class="p-6 border-b border-gray-200 dark:border-gray-800">
@@ -21,6 +21,7 @@
               />
             </div>
           </div>
+
           <!-- Rooms List -->
           <div class="flex-1 overflow-y-auto">
             <div class="p-2 space-y-2">

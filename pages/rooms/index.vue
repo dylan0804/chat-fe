@@ -1,5 +1,4 @@
 <template>
-    <!-- Chat Section Placeholder -->
     <div class="flex-grow flex items-center justify-center bg-gray-100 dark:bg-gray-900/50">
       <div class="text-center">
         <UIcon

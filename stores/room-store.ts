@@ -13,10 +13,9 @@ interface RoomDetails {
 }
 
 interface Message {
-    id?: string
     content: string
-    userId?: string
-    createdAt?: string
+    userId: string
+    createdAt: string
 }
 
 export const useRoomStore = defineStore('room-store', () => {
@@ -26,7 +25,10 @@ export const useRoomStore = defineStore('room-store', () => {
     const messages = ref<Message[]>([])
 
     async function getRoom(id: string) {
-        return await $api<BaseResponse<Room>>(`/rooms/${id}`)
+        const { data } = await $api<BaseResponse<Room>>(`/rooms/${id}`)
+
+        roomDetails.value = data.roomDetails
+        messages.value = data.messages
     }
 
     return {
