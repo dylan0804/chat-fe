@@ -1,75 +1,44 @@
-# Nuxt Minimal Starter
+# Chat
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+A modern chat application built with Nuxt 3 that allows users to chat inrooms for real-time conversations.
+
+## Features
+
+- 🔐 Session management with nuxt-auth-utils
+- 💬 Real-time messaging using VueUse's useWebSocket
+- 🎨 Modern UI with Nuxt UI
+- 📦 State management with Pinia
+
+## Tech Stack
+
+- Nuxt 3
+- Nuxt UI
+- VueUse
+- Pinia
+- TypeScript
+- Tailwind CSS
 
 ## Setup
 
-Make sure to install dependencies:
-
+1. Install dependencies:
 ```bash
-# npm
-npm install
-
-# pnpm
 pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
+2. Create `.env` file:
+```env
+API_URL=http://localhost:8080/api
+```
 
-Start the development server on `http://localhost:3000`:
-
+3. Start development server:
 ```bash
-# npm
-npm run dev
-
-# pnpm
 pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+## Project Structure
 
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+- `pages/` - Application routes
+- `components/` - Reusable Vue components
+- `composables/` - Shared composable functions
+- `stores/` - Pinia stores for state management
+- `layouts/` - Page layouts including sidebar
