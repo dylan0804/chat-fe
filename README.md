@@ -22,7 +22,7 @@ A modern chat application built with Nuxt 3 that allows users to chat inrooms fo
 
 1. Install dependencies:
 ```bash
-pnpm install
+npm install
 ```
 
 2. Create `.env` file:
@@ -32,7 +32,7 @@ API_URL=http://localhost:8080/api
 
 3. Start development server:
 ```bash
-pnpm dev
+npm run dev
 ```
 
 ## Project Structure
